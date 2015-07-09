@@ -56,13 +56,13 @@ def N(T,isotope):
     """Atomic number density at T for given isotope"""
     return abundance[isotope]*P(T)*133.323/(k*T)
 
-lProbe = 780.241e-9
+lProbe = 794.979e-9
 
 kProbe = 2*pi/lProbe
 
 omegaProbe = kProbe*c
 
-Gamma2 = 2*pi*6.065e6 # Excited state decay rate
+Gamma2 = 2*pi*5.746e6 # Excited state decay rate
 
 d21 = sqrt(3)*sqrt(3*epsilon_0*hbar*Gamma2*lProbe**3/(8*pi**2)) # reduced matrix element
 
@@ -110,25 +110,25 @@ def V85(y, T):
 
 # Transition strength factors C_F^2, call as F87[1][2] for the F=1 to F'=2 strength
 
-F87 = [[ 0.0, 0.0, 0.0, 0.0],
-       [ 1/9.0, 5/18.0, 5/18.0, 0.0],
-       [ 0.0,  1/18.0, 5/18.0, 7/9.0]]
+F87 = [[ 0.0, 0.0, 0.0],
+       [ 0.0, 1/18.0, 5/18.0],
+       [ 0.0, 5/18.0, 5/18.0]]
 
-F85 = [[ 0.0, 0.0, 0.0, 0.0, 0.0],
-       [ 0.0, 0.0, 0.0, 0.0, 0.0],
-       [ 0.0, 1/3.0, 35/81.0, 28/81.0, 0.0],
-       [ 0.0, 0.0,  10/81.0, 35/81.0, 1.0]]
+F85 = [[ 0.0, 0.0, 0.0, 0.0 ],
+       [ 0.0, 0.0, 0.0, 0.0 ],
+       [ 0.0, 0.0, 10/81.0, 35/81.0],
+       [ 0.0, 0.0, 35/81.0, 28/81.0]]
 
 # Detuning factors, call as det87[1][2] for the F=1 to F'=2 hyperfine transition
 
-detF87 = [[ 0.0, 0.0, 0.0, 0.0],
-          [ -4027.403e6, -4099.625e6, -4256.570e6, 0.0],
-          [ 0.0,  2735.050e6, 2578.110e6, 2311.260e6]]
+detF87 = [[ 0.0, 0.0, 0.0],
+          [ 0.0, 3820.046e6, 4632.339e6],
+          [ 0.0,  -3014.644e6, -2202.381e6]]
 
-detF85 = [[ 0.0, 0.0, 0.0, 0.0, 0.0],
-          [ 0.0, 0.0, 0.0, 0.0, 0.0],
-          [ 0.0, -1635.454e6, -1664.714e6, -1728.134e6, 0.0],
-          [ 0.0, 0.0, 1371.290e6, 1307.870e6, 1186.910e6]]
+detF85 = [[ 0.0, 0.0, 0.0, 0.0],
+          [ 0.0, 0.0, 0.0, 0.0],
+		  [ 0.0,0.0, 1538.063e6, 1900.087e6],
+         [ 0.0, 0.0, -1497.657e6, -1135.721e6]]
 
 def K87(T,Fg,Fe):
     return F87[Fg][Fe]*1/8.0*1/(hbar*epsilon_0) * d21**2 * N(T, "87")/(kProbe * u87(T))
@@ -154,11 +154,11 @@ def chiIm85(delta,T,Fg,Fe):
 
 def TotalChiRe(delta,T):
     """The total real part of the susceptibility is the sum of each transition"""
-    return chiRe87(delta,T,1,0) + chiRe87(delta,T,1,1) + chiRe87(delta,T,1,2) + chiRe87(delta,T,2,1) + chiRe87(delta,T,2,2) + chiRe87(delta,T,2,3) + chiRe85(delta,T,2,1) + chiRe85(delta,T,2,2) + chiRe85(delta,T,2,3) + chiRe85(delta,T,3,2) + chiRe85(delta,T,3,3) + chiRe85(delta,T,3,4)
+    return chiRe87(delta,T,1,1) + chiRe87(delta,T,1,2) + chiRe87(delta,T,2,1) + chiRe87(delta,T,2,2) + chiRe85(delta,T,2,2) + chiRe85(delta,T,2,3) + chiRe85(delta,T,3,2) + chiRe85(delta,T,3,3)
 
 def TotalChiIm(delta,T):
     """The total imaginary part of the susceptibility is the sum of each transition"""
-    return chiIm87(delta,T,1,0) + chiIm87(delta,T,1,1) + chiIm87(delta,T,1,2) + chiIm87(delta,T,2,1) + chiIm87(delta,T,2,2) + chiIm87(delta,T,2,3) + chiIm85(delta,T,2,1) + chiIm85(delta,T,2,2) + chiIm85(delta,T,2,3) + chiIm85(delta,T,3,2) + chiIm85(delta,T,3,3) + chiIm85(delta,T,3,4)
+    return chiIm87(delta,T,1,1) + chiIm87(delta,T,1,2) + chiIm87(delta,T,2,1) + chiIm87(delta,T,2,2) + chiIm85(delta,T,2,2) + chiIm85(delta,T,2,3) + chiIm85(delta,T,3,2) + chiIm85(delta,T,3,3)
 
 def Totaln(delta,T):
     return 1+1/2.0*TotalChiRe(delta,T)
@@ -174,7 +174,7 @@ def groupVelocity(delta, T, Lc):
     ndata = Totaln(delta*1e9, T)
     dndw = (roll(ndata,-1) - ndata)/((delta[1] - delta[0])*1e9)  # numerical derivative dn/dw
     ng = ndata[:-1] + (delta[:-1]*1e9 + omegaProbe)*dndw[:-1]  # group index
-    vg = 3e8/ng
+    vg = c/ng  # Replaced 3e8 with c, I think this is what was intended.
     return vg
 
 def main():
@@ -190,7 +190,7 @@ def main():
 
     subplot(3, 1, 1)
     plot(delta, transdata)
-    title("Rubidium D2 Spectrum at T= " + str(T) + " K")
+    title("Rubidium D1 Spectrum at T= " + str(T) + " K")
     ylabel("Transmission (Arb. Units)")
     subplot(3, 1, 2)
     plot(delta, ndata)
@@ -205,3 +205,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
